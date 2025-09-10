@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,16 +50,21 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
+      },
+      backgroundImage: {
+        'automotive-gradient': 'var(--automotive-gradient)',
+        'tire-gradient': 'var(--tire-gradient)',
+        'chrome-gradient': 'var(--chrome-gradient)',
+      },
+      boxShadow: {
+        'automotive': 'var(--shadow-automotive)',
+        'glow': 'var(--glow-electric)',
+      },
+      animation: {
+        'tire-spin': 'tire-spin 2s linear infinite',
+        'tire-roll': 'tire-roll 1s ease-in-out forwards',
+        'slide-up': 'slide-up 0.6s ease-out forwards',
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
       },
       borderRadius: {
         lg: "var(--radius)",
