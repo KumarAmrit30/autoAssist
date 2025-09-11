@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { AuthButton } from "@/components/auth/AuthComponents";
 import { 
   Search, 
   User, 
@@ -70,30 +71,9 @@ export function Navigation() {
             </div>
           </div>
 
-          {/* User Menu */}
+          {/* Authentication Button */}
           <div className="flex items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <User className="w-5 h-5" />
-                  <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-primary" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Search className="w-4 h-4 mr-2" />
-                  Search History
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AuthButton />
 
             {/* Mobile Menu Button */}
             <Button
