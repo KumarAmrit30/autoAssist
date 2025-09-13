@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LoadingPage } from "@/components/ui/loading-page";
+import { AnimatedPage } from "@/components/ui/animated-page";
 import Home from "./Home";
 
 const Index = () => {
@@ -15,17 +16,23 @@ const Index = () => {
   };
 
   if (!showApp) {
-    return <LoadingPage onGetStarted={handleGetStarted} />;
+    return (
+      <AnimatedPage animation="automotive">
+        <LoadingPage onGetStarted={handleGetStarted} />
+      </AnimatedPage>
+    );
   }
 
   return (
-    <div
-      className={`transition-opacity duration-500 ${
-        isHomeVisible ? "opacity-100" : "opacity-0"
-      }`}
-    >
-      <Home />
-    </div>
+    <AnimatedPage animation="automotive">
+      <div
+        className={`transition-opacity duration-500 ${
+          isHomeVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <Home />
+      </div>
+    </AnimatedPage>
   );
 };
 

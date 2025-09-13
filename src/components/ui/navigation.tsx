@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AuthButton } from "@/components/auth/AuthComponents";
+import { useAnimatedNavigation } from "@/hooks/useAnimatedNavigation";
 import {
   Search,
   User,
@@ -14,17 +15,11 @@ import {
   Info,
   Phone,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { fadeNavigate } = useAnimatedNavigation();
 
   const navItems = [
     { name: "Home", icon: Home, href: "/" },
@@ -40,9 +35,12 @@ export function Navigation() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold bg-automotive-gradient bg-clip-text text-transparent">
+              <button
+                onClick={() => fadeNavigate("/", 300)}
+                className="text-2xl font-bold bg-automotive-gradient bg-clip-text text-transparent hover:scale-105 transition-transform duration-200"
+              >
                 AutoAssist
-              </h1>
+              </button>
             </div>
 
             {/* Desktop Navigation */}
@@ -51,7 +49,8 @@ export function Navigation() {
                 <Button
                   key={item.name}
                   variant="ghost"
-                  className="flex items-center space-x-2 hover:text-primary transition-colors"
+                  onClick={() => fadeNavigate(item.href, 300)}
+                  className="flex items-center space-x-2 hover:text-primary transition-all duration-200 hover:scale-105"
                 >
                   <item.icon className="w-4 h-4" />
                   <span>{item.name}</span>
@@ -100,7 +99,8 @@ export function Navigation() {
                   <Button
                     key={item.name}
                     variant="ghost"
-                    className="w-full justify-start space-x-2"
+                    onClick={() => fadeNavigate(item.href, 300)}
+                    className="w-full justify-start space-x-2 transition-all duration-200 hover:scale-105"
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.name}</span>
