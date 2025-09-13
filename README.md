@@ -1,4 +1,4 @@
-# Auto Chronicle Lab - CarVault 🚗
+# Auto Chronicle Lab - AutoAssist🚗
 
 A modern, responsive car information platform built with React, TypeScript, and Tailwind CSS. Discover, compare, and explore cars with our comprehensive automotive platform.
 
