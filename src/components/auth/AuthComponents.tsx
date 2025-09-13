@@ -17,7 +17,7 @@ export const LoginCard: React.FC = () => {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold bg-automotive-gradient bg-clip-text text-transparent">
-          Welcome to CarVault
+          Welcome to AutoAssist
         </CardTitle>
         <CardDescription>
           Sign in to access personalized car recommendations and save your
@@ -71,7 +71,7 @@ export const UserProfile: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-center text-sm text-muted-foreground">
-          Welcome back! You're now signed in to CarVault.
+          Welcome back! You're now signed in to AutoAssist.
         </div>
 
         <Button onClick={logout} variant="outline" className="w-full">

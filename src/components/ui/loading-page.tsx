@@ -40,10 +40,10 @@ export function LoadingPage({ onGetStarted }: LoadingPageProps) {
       </div>
 
       <div className="relative z-10 text-center">
-        {/* CarVault Logo */}
+        {/* AutoAssistLogo */}
         <div className="mb-8">
           <h1 className="text-6xl font-bold mb-2 bg-automotive-gradient bg-clip-text text-transparent">
-            CarVault
+            AutoAssist
           </h1>
           <p className="text-muted-foreground text-lg font-medium">
             Your Premium Car Information Hub

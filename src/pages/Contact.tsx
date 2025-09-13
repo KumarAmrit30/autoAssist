@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Clock, 
-  Send, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Send,
   MessageCircle,
   Twitter,
   Instagram,
   Linkedin,
-  Facebook
+  Facebook,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,7 +24,7 @@ export default function Contact() {
     name: "",
     email: "",
     subject: "",
-    message: ""
+    message: "",
   });
   const { toast } = useToast();
 
@@ -42,40 +42,40 @@ export default function Contact() {
     {
       icon: Mail,
       title: "Email Us",
-      value: "support@carvault.com",
-      description: "Get in touch via email"
+      value: "support@AutoAssist.com",
+      description: "Get in touch via email",
     },
     {
       icon: Phone,
       title: "Call Us",
       value: "+91 98765 43210",
-      description: "Mon-Fri 9AM-6PM IST"
+      description: "Mon-Fri 9AM-6PM IST",
     },
     {
       icon: MapPin,
       title: "Visit Us",
       value: "Mumbai, Maharashtra",
-      description: "India"
+      description: "India",
     },
     {
       icon: Clock,
       title: "Business Hours",
       value: "9:00 AM - 6:00 PM",
-      description: "Monday to Friday"
-    }
+      description: "Monday to Friday",
+    },
   ];
 
   const socialLinks = [
     { icon: Twitter, name: "Twitter", href: "#" },
     { icon: Instagram, name: "Instagram", href: "#" },
     { icon: Linkedin, name: "LinkedIn", href: "#" },
-    { icon: Facebook, name: "Facebook", href: "#" }
+    { icon: Facebook, name: "Facebook", href: "#" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <section className="text-center mb-16">
@@ -86,7 +86,7 @@ export default function Contact() {
             Get in Touch
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have questions about cars or need help finding the perfect vehicle? 
+            Have questions about cars or need help finding the perfect vehicle?
             Our team of automotive experts is here to assist you.
           </p>
         </section>
@@ -105,49 +105,65 @@ export default function Contact() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Name</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        Name
+                      </label>
                       <Input
                         placeholder="Your full name"
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Email</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        Email
+                      </label>
                       <Input
                         type="email"
                         placeholder="your.email@example.com"
                         value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                         required
                       />
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Subject</label>
+                    <label className="text-sm font-medium mb-2 block">
+                      Subject
+                    </label>
                     <Input
                       placeholder="What can we help you with?"
                       value={formData.subject}
-                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subject: e.target.value })
+                      }
                       required
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Message</label>
+                    <label className="text-sm font-medium mb-2 block">
+                      Message
+                    </label>
                     <Textarea
                       placeholder="Tell us more about your inquiry..."
                       rows={5}
                       value={formData.message}
-                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, message: e.target.value })
+                      }
                       required
                     />
                   </div>
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full bg-automotive-gradient hover:shadow-glow transition-all duration-300"
                   >
                     <Send className="w-4 h-4 mr-2" />
@@ -173,8 +189,12 @@ export default function Contact() {
                     </div>
                     <div>
                       <div className="font-medium">{info.title}</div>
-                      <div className="text-primary font-semibold">{info.value}</div>
-                      <div className="text-sm text-muted-foreground">{info.description}</div>
+                      <div className="text-primary font-semibold">
+                        {info.value}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {info.description}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -196,7 +216,7 @@ export default function Contact() {
                     <li>• Account and profile help</li>
                   </ul>
                 </div>
-                
+
                 <Button variant="outline" className="w-full">
                   View FAQ
                 </Button>
@@ -221,10 +241,11 @@ export default function Contact() {
                     </Button>
                   ))}
                 </div>
-                
+
                 <div className="mt-4 p-4 bg-primary/5 rounded-lg">
                   <p className="text-sm text-muted-foreground">
-                    Stay updated with the latest car news, reviews, and automotive trends!
+                    Stay updated with the latest car news, reviews, and
+                    automotive trends!
                   </p>
                 </div>
               </CardContent>
@@ -237,7 +258,8 @@ export default function Contact() {
           <div className="max-w-3xl mx-auto bg-automotive-gradient p-8 rounded-lg text-primary-foreground">
             <h2 className="text-3xl font-bold mb-4">Need Immediate Help?</h2>
             <p className="text-lg mb-6 opacity-90">
-              Our support team is available to help you find the perfect car for your needs
+              Our support team is available to help you find the perfect car for
+              your needs
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
