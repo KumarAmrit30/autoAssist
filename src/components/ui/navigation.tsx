@@ -21,8 +21,35 @@ export function Navigation() {
   const [searchQuery, setSearchQuery] = useState("");
   const { fadeNavigate } = useAnimatedNavigation();
 
+  const handleLogoClick = () => {
+    // Check if user has seen the loading screen via logo before
+    const hasSeenLogoLoading = (() => {
+      try {
+        return localStorage.getItem("hasSeenLogoLoading") === "true";
+      } catch (error) {
+        console.error("localStorage not available:", error);
+        return false;
+      }
+    })();
+
+    if (hasSeenLogoLoading) {
+      // User has seen loading before, go directly to /home
+      console.log("Logo clicked: User has seen loading before, going to /home");
+      fadeNavigate("/home", 300);
+    } else {
+      // First time clicking logo, show loading screen
+      console.log("Logo clicked: First time, going to / (with loading)");
+      try {
+        localStorage.setItem("hasSeenLogoLoading", "true");
+      } catch (error) {
+        console.error("Could not set localStorage:", error);
+      }
+      fadeNavigate("/", 300);
+    }
+  };
+
   const navItems = [
-    { name: "Home", icon: Home, href: "/" },
+    { name: "Home", icon: Home, href: "/home" },
     { name: "About Us", icon: Info, href: "/about" },
     { name: "Contact", icon: Phone, href: "/contact" },
     { name: "Compare Cars", icon: GitCompare, href: "/compare" },
@@ -36,7 +63,7 @@ export function Navigation() {
             {/* Logo */}
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => fadeNavigate("/", 300)}
+                onClick={handleLogoClick}
                 className="text-2xl font-bold bg-automotive-gradient bg-clip-text text-transparent hover:scale-105 transition-transform duration-200"
               >
                 AutoAssist

@@ -529,7 +529,7 @@ export const AuthButton: React.FC = () => {
 
   return (
     <Button
-      onClick={() => slideNavigate("/auth", "right", 400)}
+      onClick={() => slideNavigate("/auth", "left", 400)}
       className="bg-automotive-gradient hover:shadow-glow transition-all duration-200 hover:scale-105"
     >
       <LogIn className="w-4 h-4 mr-2" />
