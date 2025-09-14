@@ -34,7 +34,7 @@ const NotFound = () => {
 
           <div className="space-y-4">
             <Button
-              onClick={() => fadeNavigate("/", 300)}
+              onClick={() => fadeNavigate("/home", 300)}
               className="w-full bg-automotive-gradient hover:shadow-glow transition-all duration-200 hover:scale-105"
             >
               <Home className="w-4 h-4 mr-2" />
