@@ -45,9 +45,9 @@ export default function About() {
   ];
 
   const stats = [
-    { label: "Cars Listed", value: "500+" },
-    { label: "Happy Users", value: "50K+" },
-    { label: "Expert Reviews", value: "1000+" },
+    { label: "Cars Given", value: "500+" },
+    { label: "Happy Chodus", value: "50K+" },
+    { label: "Expert Notifications", value: "1000+" },
     { label: "Daily Searches", value: "10K+" },
   ];
 
@@ -209,3 +209,4 @@ export default function About() {
     </AnimatedPage>
   );
 }
+Chitransh <Saxena></Saxena>
