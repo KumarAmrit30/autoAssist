@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigation } from "@/components/ui/navigation";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
@@ -6,20 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, TrendingUp, Star } from "lucide-react";
 import { carsData, searchCars } from "@/data/cars";
+import { useNavigate } from "react-router-dom";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { AnimatedPage } from "@/components/ui/animated-page";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCars, setFilteredCars] = useState(carsData);
+  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setPage(1);
     if (query.trim() === "") {
       setFilteredCars(carsData);
     } else {
       setFilteredCars(searchCars(query));
     }
   };
+  const totalPages = Math.max(1, Math.ceil(filteredCars.length / pageSize));
+  const pageData = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredCars.slice(start, start + pageSize);
+  }, [filteredCars, page]);
+
+  const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
+
 
   const popularBrands = [
     "Hyundai",
@@ -140,8 +154,8 @@ export default function Home() {
 
             {filteredCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredCars.map((car) => (
-                  <CarCard key={car.id} car={car} />
+                {pageData.map((car) => (
+                  <CarCard key={car.id} car={car} onViewDetails={(id) => navigate(`/cars/${id}`)} />
                 ))}
               </div>
             ) : (
@@ -155,6 +169,51 @@ export default function Home() {
                 <Button onClick={() => handleSearch("")} variant="outline">
                   View All Cars
                 </Button>
+              </div>
+            )}
+            {filteredCars.length > pageSize && (
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); goToPage(page - 1); }} />
+                    </PaginationItem>
+
+                    {Array.from({ length: totalPages }).map((_, idx) => {
+                      const p = idx + 1;
+                      const isEdge = p === 1 || p === totalPages;
+                      const isNear = Math.abs(p - page) <= 1;
+                      if (totalPages <= 7 || isEdge || isNear) {
+                        return (
+                          <PaginationItem key={p}>
+                            <PaginationLink href="#" isActive={p === page} onClick={(e) => { e.preventDefault(); goToPage(p); }}>
+                              {p}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+                      if (p === 2 && page > 3) {
+                        return (
+                          <PaginationItem key={p}>
+                            <span className="px-2">…</span>
+                          </PaginationItem>
+                        );
+                      }
+                      if (p === totalPages - 1 && page < totalPages - 2) {
+                        return (
+                          <PaginationItem key={p}>
+                            <span className="px-2">…</span>
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    })}
+
+                    <PaginationItem>
+                      <PaginationNext href="#" onClick={(e) => { e.preventDefault(); goToPage(page + 1); }} />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </section>
