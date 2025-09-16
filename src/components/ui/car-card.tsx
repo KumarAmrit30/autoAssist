@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Star, Fuel, Settings, Users } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { getAssetUrl, getAltCasingAssetUrlIfExists } from "@/lib/utils";
+import { useCompare } from "@/contexts/CompareContext";
 
 interface CarCardProps {
   car: {
@@ -10,6 +13,7 @@ interface CarCardProps {
     brand: string;
     price: string;
     image: string;
+    images?: string[];
     rating: number;
     fuelType: string;
     transmission: string;
@@ -21,19 +25,79 @@ interface CarCardProps {
 }
 
 export function CarCard({ car, onViewDetails }: CarCardProps) {
+  const { selected, toggle } = useCompare();
+  const isSelected = selected.some((c) => c.id === car.id);
+  const cretaFolderImages = [
+    "/assets/images/Creta/cretakingknightinnerkv-pc.webp",
+    "/assets/images/Creta/creta-n-line-exterior-right-front-three-quarter-25.webp",
+    "/assets/images/Creta/creta-n-line-exterior-right-side-view-4.webp",
+    "/assets/images/Creta/hyundai-creta-left-rear-three-quarter0.webp",
+  ];
+  const imagesToShow = car.id === "1" ? cretaFolderImages : car.images;
+
   return (
     <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-automotive bg-card/50 backdrop-blur-sm">
       <CardHeader className="pb-3">
-        <div className="relative">
-          <img
-            src={car.image}
-            alt={car.name}
-            className="w-full h-48 object-cover rounded-lg bg-secondary/20"
-          />
+        <div
+          className="relative cursor-pointer"
+          onClick={() => onViewDetails?.(car.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onViewDetails?.(car.id);
+          }}
+          role="button"
+          tabIndex={0}
+        >
+          {imagesToShow && imagesToShow.length > 0 ? (
+            <div className="relative">
+              <Carousel className="[&_.embla__container]:rounded-lg">
+                <CarouselContent>
+                  {imagesToShow.map((src, idx) => (
+                    <CarouselItem key={idx}>
+                      <img
+                        src={getAssetUrl(src)}
+                        alt={`${car.name} ${idx + 1}`}
+                        className="w-full h-48 object-cover rounded-lg bg-secondary/20"
+                        onError={(e) => {
+                          // Fallback to placeholder on load failure and log URL for debugging
+                          // eslint-disable-next-line no-console
+                          const alt = getAltCasingAssetUrlIfExists(src);
+                          if (alt) {
+                            (e.currentTarget as HTMLImageElement).src = alt;
+                          } else {
+                            console.warn("Image failed to load:", getAssetUrl(src));
+                            (e.currentTarget as HTMLImageElement).src = getAssetUrl("/placeholder.svg");
+                          }
+                        }}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="-left-3" onPointerDownCapture={(e) => e.stopPropagation()} />
+                <CarouselNext className="-right-3" onPointerDownCapture={(e) => e.stopPropagation()} />
+              </Carousel>
+            </div>
+          ) : (
+            <img
+              src={getAssetUrl(car.image)}
+              alt={car.name}
+              className="w-full h-48 object-cover rounded-lg bg-secondary/20"
+              onError={(e) => {
+                // eslint-disable-next-line no-console
+                const alt = getAltCasingAssetUrlIfExists(car.image);
+                if (alt) {
+                  (e.currentTarget as HTMLImageElement).src = alt;
+                } else {
+                  console.warn("Image failed to load:", getAssetUrl(car.image));
+                  (e.currentTarget as HTMLImageElement).src = getAssetUrl("/placeholder.svg");
+                }
+              }}
+            />
+          )}
           <Button
             size="icon"
             variant="ghost"
             className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+            onClick={(e) => e.stopPropagation()}
           >
             <Heart className="w-4 h-4" />
           </Button>
@@ -88,14 +152,18 @@ export function CarCard({ car, onViewDetails }: CarCardProps) {
         </div>
 
         <div className="flex space-x-2 pt-2">
-          <Button 
-            className="flex-1" 
+          <Button
+            className="flex-1"
             onClick={() => onViewDetails?.(car.id)}
           >
             View Details
           </Button>
-          <Button variant="outline" className="flex-1">
-            Compare
+          <Button
+            variant={isSelected ? "default" : "outline"}
+            className="flex-1"
+            onClick={() => toggle(car as any)}
+          >
+            {isSelected ? "Selected" : "Compare"}
           </Button>
         </div>
       </CardContent>

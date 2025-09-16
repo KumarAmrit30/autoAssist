@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
@@ -7,19 +8,30 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, TrendingUp, Star } from "lucide-react";
 import { carsData, searchCars } from "@/data/cars";
 import { AnimatedPage } from "@/components/ui/animated-page";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCars, setFilteredCars] = useState(carsData);
+  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setPage(1);
     if (query.trim() === "") {
       setFilteredCars(carsData);
     } else {
       setFilteredCars(searchCars(query));
     }
   };
+
+  const totalPages = Math.max(1, Math.ceil(filteredCars.length / pageSize));
+  const pagedCars = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredCars.slice(start, start + pageSize);
+  }, [filteredCars, page]);
 
   const popularBrands = [
     "Hyundai",
@@ -140,8 +152,8 @@ export default function Home() {
 
             {filteredCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredCars.map((car) => (
-                  <CarCard key={car.id} car={car} />
+                {pagedCars.map((car) => (
+                  <CarCard key={car.id} car={car} onViewDetails={(id) => navigate(`/cars/${id}`)} />
                 ))}
               </div>
             ) : (
@@ -158,6 +170,28 @@ export default function Home() {
               </div>
             )}
           </section>
+
+          {filteredCars.length > pageSize && (
+            <div className="mt-10 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }} />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <PaginationItem key={idx}>
+                      <PaginationLink href="#" isActive={page === idx + 1} onClick={(e) => { e.preventDefault(); setPage(idx + 1); }}>
+                        {idx + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }} />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </main>
       </div>
     </AnimatedPage>
