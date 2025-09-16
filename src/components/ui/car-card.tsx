@@ -9,7 +9,8 @@ interface CarCardProps {
     name: string;
     brand: string;
     price: string;
-    image: string;
+    image?: string;
+    images?: string[];
     rating: number;
     fuelType: string;
     transmission: string;
@@ -21,12 +22,13 @@ interface CarCardProps {
 }
 
 export function CarCard({ car, onViewDetails }: CarCardProps) {
+  const displayImage = car.image ?? (car.images && car.images.length > 0 ? car.images[0] : "/placeholder.svg");
   return (
     <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-automotive bg-card/50 backdrop-blur-sm">
       <CardHeader className="pb-3">
         <div className="relative">
           <img
-            src={car.image}
+            src={displayImage}
             alt={car.name}
             className="w-full h-48 object-cover rounded-lg bg-secondary/20"
           />
