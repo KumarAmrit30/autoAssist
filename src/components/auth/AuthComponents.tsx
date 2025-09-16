@@ -12,21 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  LogIn,
-  User,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Check,
-  Globe,
-  ArrowRight,
-  Instagram,
-  Play,
-  Key,
-  Menu,
-} from "lucide-react";
+import { LogIn, User, Mail, Lock, Eye, EyeOff, Check, ArrowRight } from "lucide-react";
 
 export const LoginCard: React.FC = () => {
   const { login, isLoading } = useAuth();
@@ -49,9 +35,11 @@ export const LoginCard: React.FC = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     if (field === "password") {
+      const hasDigit = /[0-9]/.test(value);
+      const hasSymbol = /[^A-Za-z0-9]/.test(value);
       setPasswordChecks({
         length: value.length >= 8,
-        number: /[0-9!@#$%^&*(),.?":{}|<>]/.test(value),
+        number: hasDigit || hasSymbol,
         case: /[a-z]/.test(value) && /[A-Z]/.test(value),
       });
     }
@@ -107,196 +95,195 @@ export const LoginCard: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {/* Name Field - Only for Sign Up */}
-              {isSignUp && (
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    type="text"
-                    placeholder="Daniel Ahmadi"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                  {formData.name && (
-                    <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 w-5 h-5" />
-                  )}
-                </div>
-              )}
-
-              {/* Email Field */}
+            {/* Name Field - Only for Sign Up */}
+            {isSignUp && (
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
-                  type="email"
-                  placeholder="TDanielehmadi@gmail.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  type="text"
+                  placeholder="Daniel Ahmadi"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                   className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                 />
-                {formData.email && (
+                {formData.name && (
                   <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 w-5 h-5" />
                 )}
               </div>
+            )}
 
-              {/* Password Field */}
+            {/* Email Field */}
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                type="email"
+                placeholder="TDanielehmadi@gmail.com"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+              {formData.email && (
+                <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 w-5 h-5" />
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  handleInputChange("password", e.target.value)
+                }
+                className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+
+            {/* Password Requirements - Only for Sign Up */}
+            {isSignUp && formData.password && (
+              <div className="space-y-2 text-sm">
+                <div
+                  className={`flex items-center ${
+                    passwordChecks.length ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  <Check
+                    className={`w-4 h-4 mr-2 ${
+                      passwordChecks.length
+                        ? "text-green-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                  At least 8 characters
+                </div>
+                <div
+                  className={`flex items-center ${
+                    passwordChecks.number ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  <Check
+                    className={`w-4 h-4 mr-2 ${
+                      passwordChecks.number
+                        ? "text-green-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                  At least one number (0-9) or a symbol
+                </div>
+                <div
+                  className={`flex items-center ${
+                    passwordChecks.case ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  <Check
+                    className={`w-4 h-4 mr-2 ${
+                      passwordChecks.case ? "text-green-500" : "text-gray-300"
+                    }`}
+                  />
+                  Lowercase (a-z) and uppercase (A-Z)
+                </div>
+              </div>
+            )}
+
+            {/* Confirm Password Field - Only for Sign Up */}
+            {isSignUp && (
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={formData.password}
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-Type Password"
+                  value={formData.confirmPassword}
                   onChange={(e) =>
-                    handleInputChange("password", e.target.value)
+                    handleInputChange("confirmPassword", e.target.value)
                   }
                   className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
+                  {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
                   ) : (
                     <Eye className="w-5 h-5" />
                   )}
                 </button>
               </div>
+            )}
 
-              {/* Password Requirements - Only for Sign Up */}
-              {isSignUp && formData.password && (
-                <div className="space-y-2 text-sm">
-                  <div
-                    className={`flex items-center ${
-                      passwordChecks.length ? "text-green-600" : "text-gray-500"
-                    }`}
-                  >
-                    <Check
-                      className={`w-4 h-4 mr-2 ${
-                        passwordChecks.length
-                          ? "text-green-500"
-                          : "text-gray-300"
-                      }`}
-                    />
-                    At least 8 characters
-                  </div>
-                  <div
-                    className={`flex items-center ${
-                      passwordChecks.number ? "text-green-600" : "text-gray-500"
-                    }`}
-                  >
-                    <Check
-                      className={`w-4 h-4 mr-2 ${
-                        passwordChecks.number
-                          ? "text-green-500"
-                          : "text-gray-300"
-                      }`}
-                    />
-                    At least one number (0-9) or a symbol
-                  </div>
-                  <div
-                    className={`flex items-center ${
-                      passwordChecks.case ? "text-green-600" : "text-gray-500"
-                    }`}
-                  >
-                    <Check
-                      className={`w-4 h-4 mr-2 ${
-                        passwordChecks.case ? "text-green-500" : "text-gray-300"
-                      }`}
-                    />
-                    Lowercase (a-z) and uppercase (A-Z)
-                  </div>
-                </div>
-              )}
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full h-10 lg:h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg lg:rounded-xl flex items-center justify-center gap-2 transition-transform duration-200 hover:scale-[1.01]"
+            >
+              {isSignUp ? "Sign Up" : "Sign In"}
+              <ArrowRight className="w-4 lg:w-5 h-4 lg:h-5" />
+            </Button>
 
-              {/* Confirm Password Field - Only for Sign Up */}
-              {isSignUp && (
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Re-Type Password"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      handleInputChange("confirmPassword", e.target.value)
-                    }
-                    className="pl-12 pr-12 h-10 lg:h-12 rounded-lg lg:rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full h-10 lg:h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg lg:rounded-xl flex items-center justify-center gap-2 transition-transform duration-200 hover:scale-[1.01]"
-              >
-                {isSignUp ? "Sign Up" : "Sign In"}
-                <ArrowRight className="w-4 lg:w-5 h-4 lg:h-5" />
-              </Button>
-
-              {/* Forgot Password Link - Only for Sign In */}
-              {!isSignUp && (
-                <div className="text-center">
-                  <a
-                    href="#"
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
-              )}
-
-              {/* Social Login */}
-              <div className="flex justify-center gap-3 lg:gap-4 mt-4 lg:mt-6">
-                <button className="w-10 h-10 lg:w-12 lg:h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:shadow-md transition-shadow">
-                  <svg className="w-5 lg:w-6 h-5 lg:h-6" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Bottom toggle */}
-              <div className="text-center pt-2">
-                <button
-                  type="button"
-                  onClick={toggleMode}
+            {/* Forgot Password Link - Only for Sign In */}
+            {!isSignUp && (
+              <div className="text-center">
+                <a
+                  href="#"
                   className="text-sm text-blue-600 hover:text-blue-800"
                 >
-                  {isSignUp ? "Already member? " : "Don't have an account? "}
-                  <span className="font-medium">
-                    {isSignUp ? "Sign In" : "Sign Up"}
-                  </span>
-                </button>
+                  Forgot Password?
+                </a>
               </div>
-            </form>
-          </div>
+            )}
+
+            {/* Social Login */}
+            <div className="flex justify-center gap-3 lg:gap-4 mt-4 lg:mt-6">
+              <button className="w-10 h-10 lg:w-12 lg:h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:shadow-md transition-shadow">
+                <svg className="w-5 lg:w-6 h-5 lg:h-6" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Bottom toggle */}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {isSignUp ? "Already member? " : "Don't have an account? "}
+                <span className="font-medium">
+                  {isSignUp ? "Sign In" : "Sign Up"}
+                </span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
