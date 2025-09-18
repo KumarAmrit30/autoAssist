@@ -1,49 +1,60 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Navigation } from "@/components/ui/navigation";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, TrendingUp, Star } from "lucide-react";
-import { carsData, searchCars } from "@/data/cars";
+import { Search, Filter, TrendingUp, Star, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { AnimatedPage } from "@/components/ui/animated-page";
+import { useCars, usePopularBrands, useFuelTypes } from "@/hooks/useCars";
+import { carsData, searchCars } from "@/data/cars"; // Fallback data
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredCars, setFilteredCars] = useState(carsData);
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
+  // API calls
+  const {
+    data: carsResponse,
+    isLoading: carsLoading,
+    error: carsError,
+  } = useCars({
+    query: searchQuery || undefined,
+    page,
+    limit: pageSize,
+  });
+
+  const { data: popularBrands = [], isLoading: brandsLoading } =
+    usePopularBrands();
+  const { data: fuelTypes = [], isLoading: fuelTypesLoading } = useFuelTypes();
+
+  // Fallback to static data if API fails
+  const cars = carsResponse?.cars || (carsError ? carsData : []);
+  const totalPages =
+    carsResponse?.totalPages ||
+    Math.max(1, Math.ceil((carsError ? carsData.length : 0) / pageSize));
+  const totalCars = carsResponse?.total || (carsError ? carsData.length : 0);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setPage(1);
-    if (query.trim() === "") {
-      setFilteredCars(carsData);
-    } else {
-      setFilteredCars(searchCars(query));
-    }
   };
-  const totalPages = Math.max(1, Math.ceil(filteredCars.length / pageSize));
-  const pageData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredCars.slice(start, start + pageSize);
-  }, [filteredCars, page]);
 
   const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
 
-
-  const popularBrands = [
-    "Hyundai",
-    "Maruti Suzuki",
-    "Tata",
-    "Mahindra",
-    "Toyota",
-    "Honda",
-  ];
-  const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
+  // Show loading state
+  const isLoading = carsLoading || brandsLoading || fuelTypesLoading;
 
   return (
     <AnimatedPage animation="automotive">
@@ -148,14 +159,23 @@ export default function Home() {
                   : "Popular Cars"}
               </h2>
               <div className="text-muted-foreground">
-                {filteredCars.length} cars found
+                {totalCars} cars found
               </div>
             </div>
 
-            {filteredCars.length > 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-2 text-lg">Loading cars...</span>
+              </div>
+            ) : cars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {pageData.map((car) => (
-                  <CarCard key={car.id} car={car} onViewDetails={(id) => navigate(`/cars/${id}`)} />
+                {cars.map((car) => (
+                  <CarCard
+                    key={car.id}
+                    car={car}
+                    onViewDetails={(id) => navigate(`/cars/${id}`)}
+                  />
                 ))}
               </div>
             ) : (
@@ -163,20 +183,27 @@ export default function Home() {
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No cars found</h3>
                 <p className="text-muted-foreground mb-4">
-                  Try adjusting your search terms or browse our popular
-                  categories
+                  {carsError
+                    ? "Unable to load cars from the server. Please try again later."
+                    : "Try adjusting your search terms or browse our popular categories"}
                 </p>
                 <Button onClick={() => handleSearch("")} variant="outline">
                   View All Cars
                 </Button>
               </div>
             )}
-            {filteredCars.length > pageSize && (
+            {cars.length > 0 && totalPages > 1 && (
               <div className="mt-8">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); goToPage(page - 1); }} />
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(page - 1);
+                        }}
+                      />
                     </PaginationItem>
 
                     {Array.from({ length: totalPages }).map((_, idx) => {
@@ -186,7 +213,14 @@ export default function Home() {
                       if (totalPages <= 7 || isEdge || isNear) {
                         return (
                           <PaginationItem key={p}>
-                            <PaginationLink href="#" isActive={p === page} onClick={(e) => { e.preventDefault(); goToPage(p); }}>
+                            <PaginationLink
+                              href="#"
+                              isActive={p === page}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                goToPage(p);
+                              }}
+                            >
                               {p}
                             </PaginationLink>
                           </PaginationItem>
@@ -210,7 +244,13 @@ export default function Home() {
                     })}
 
                     <PaginationItem>
-                      <PaginationNext href="#" onClick={(e) => { e.preventDefault(); goToPage(page + 1); }} />
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(page + 1);
+                        }}
+                      />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>

@@ -1,33 +1,68 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCarById } from "@/data/cars";
 import { AnimatedPage } from "@/components/ui/animated-page";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Home } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { useCar } from "@/hooks/useCars";
+import { getCarById } from "@/data/cars"; // Fallback
 
 export default function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const car = useMemo(() => (id ? getCarById(id) : undefined), [id]);
 
-  const images = car?.images && car.images.length > 0
-    ? car.images
-    : car?.image
-      ? [car.image]
+  // API call with fallback
+  const { data: car, isLoading, error } = useCar(id || "");
+  const fallbackCar = id ? getCarById(id) : undefined;
+  const actualCar = car || (error ? fallbackCar : undefined);
+
+  const images =
+    actualCar?.images && actualCar.images.length > 0
+      ? actualCar.images
+      : actualCar?.image
+      ? [actualCar.image]
       : ["/placeholder.svg"];
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const goPrev = () => setCurrentIndex((idx) => (idx === 0 ? images.length - 1 : idx - 1));
-  const goNext = () => setCurrentIndex((idx) => (idx === images.length - 1 ? 0 : idx + 1));
+  const goPrev = () =>
+    setCurrentIndex((idx) => (idx === 0 ? images.length - 1 : idx - 1));
+  const goNext = () =>
+    setCurrentIndex((idx) => (idx === images.length - 1 ? 0 : idx + 1));
 
-  if (!car) {
+  // Loading state
+  if (isLoading) {
     return (
       <AnimatedPage animation="automotive">
         <div className="container mx-auto px-4 py-12 text-center space-y-6">
-          <div className="text-2xl font-semibold">Car not found</div>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <div className="text-2xl font-semibold">Loading car details...</div>
+        </div>
+      </AnimatedPage>
+    );
+  }
+
+  // Error or not found state
+  if (!actualCar) {
+    return (
+      <AnimatedPage animation="automotive">
+        <div className="container mx-auto px-4 py-12 text-center space-y-6">
+          <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
+          <div className="text-2xl font-semibold">
+            {error ? "Unable to load car details" : "Car not found"}
+          </div>
+          <p className="text-muted-foreground">
+            {error
+              ? "There was an error loading the car information. Please try again later."
+              : "The car you're looking for doesn't exist or has been removed."}
+          </p>
           <Button onClick={() => navigate("/home")}>Go to Home</Button>
         </div>
       </AnimatedPage>
@@ -42,7 +77,11 @@ export default function CarDetails() {
             <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
               <ChevronLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/home")}> 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/home")}
+            >
               <Home className="w-4 h-4 mr-1" /> Home
             </Button>
           </div>
@@ -54,7 +93,7 @@ export default function CarDetails() {
                   <div className="relative">
                     <img
                       src={images[currentIndex]}
-                      alt={`${car.name} image ${currentIndex + 1}`}
+                      alt={`${actualCar.name} image ${currentIndex + 1}`}
                       className="w-full h-[360px] md:h-[480px] object-cover"
                     />
 
@@ -86,7 +125,9 @@ export default function CarDetails() {
                             key={idx}
                             onClick={() => setCurrentIndex(idx)}
                             className={`h-2 rounded-full transition-all ${
-                              idx === currentIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/50"
+                              idx === currentIndex
+                                ? "w-6 bg-primary"
+                                : "w-2 bg-muted-foreground/50"
                             }`}
                             aria-label={`Go to image ${idx + 1}`}
                           />
@@ -104,10 +145,16 @@ export default function CarDetails() {
                       key={src + idx}
                       onClick={() => setCurrentIndex(idx)}
                       className={`border rounded overflow-hidden hover:opacity-90 focus:outline-none ${
-                        idx === currentIndex ? "border-primary" : "border-border"
+                        idx === currentIndex
+                          ? "border-primary"
+                          : "border-border"
                       }`}
                     >
-                      <img src={src} alt={`thumb ${idx + 1}`} className="w-full h-16 object-cover" />
+                      <img
+                        src={src}
+                        alt={`thumb ${idx + 1}`}
+                        className="w-full h-16 object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -117,24 +164,28 @@ export default function CarDetails() {
             <div className="lg:col-span-2 space-y-4">
               <div>
                 <h1 className="text-3xl font-bold">
-                  {car.brand} {car.name}
+                  {actualCar.brand} {actualCar.name}
                 </h1>
-                <div className="text-2xl font-semibold text-primary mt-2">₹{car.price}</div>
+                <div className="text-2xl font-semibold text-primary mt-2">
+                  ₹{actualCar.price}
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Badge>{car.fuelType}</Badge>
-                <Badge variant="secondary">{car.transmission}</Badge>
-                <Badge variant="outline">{car.seating} Seater</Badge>
-                <Badge variant="outline">{car.mileage}</Badge>
+                <Badge>{actualCar.fuelType}</Badge>
+                <Badge variant="secondary">{actualCar.transmission}</Badge>
+                <Badge variant="outline">{actualCar.seating} Seater</Badge>
+                <Badge variant="outline">{actualCar.mileage}</Badge>
               </div>
 
-              {car.features?.length ? (
+              {actualCar.features?.length ? (
                 <div>
                   <div className="font-medium mb-2">Key Features</div>
                   <div className="flex flex-wrap gap-2">
-                    {car.features.map((feature) => (
-                      <Badge key={feature} variant="secondary">{feature}</Badge>
+                    {actualCar.features.map((feature) => (
+                      <Badge key={feature} variant="secondary">
+                        {feature}
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -150,5 +201,3 @@ export default function CarDetails() {
     </AnimatedPage>
   );
 }
-
-

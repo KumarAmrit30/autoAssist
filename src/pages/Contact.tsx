@@ -17,11 +17,15 @@ import {
   Instagram,
   Linkedin,
   Facebook,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { contactService } from "@/services/contactService";
+import { ContactFormData } from "@/types/contact";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
     subject: "",
@@ -29,14 +33,47 @@ export default function Contact() {
   });
   const { toast } = useToast();
 
+  // Contact form submission mutation
+  const contactMutation = useMutation({
+    mutationFn: (data: ContactFormData) => contactService.submitContact(data),
+    onSuccess: (response) => {
+      toast({
+        title: "Message Sent!",
+        description:
+          response.message ||
+          "Thank you for contacting us. We'll get back to you soon.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Sending Message",
+        description:
+          error.message ||
+          "There was an error sending your message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle form submission
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+
+    // Basic validation
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.message.trim()
+    ) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    contactMutation.mutate(formData);
   };
 
   const contactInfo = [
@@ -166,10 +203,20 @@ export default function Contact() {
 
                     <Button
                       type="submit"
+                      disabled={contactMutation.isPending}
                       className="w-full bg-automotive-gradient hover:shadow-glow transition-all duration-300"
                     >
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
+                      {contactMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Message
+                        </>
+                      )}
                     </Button>
                   </form>
                 </CardContent>
