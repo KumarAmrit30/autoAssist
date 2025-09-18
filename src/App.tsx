@@ -15,7 +15,12 @@ import CarDetails from "./pages/CarDetails";
 const queryClient = new QueryClient();
 
 // Dynamic basename for development vs production
-const basename = import.meta.env.DEV ? "/" : "/autoAssist";
+// GitHub Pages uses /autoAssist, Vercel uses /
+const basename = import.meta.env.DEV
+  ? "/"
+  : window.location.hostname.includes("github.io")
+  ? "/autoAssist"
+  : "/";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
