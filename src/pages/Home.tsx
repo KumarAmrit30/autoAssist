@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/pagination";
 import { AnimatedPage } from "@/components/ui/animated-page";
 import { carsData, searchCars } from "@/data/cars";
-import { getApiUrl } from "@/config/api";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,7 +65,7 @@ export default function Home() {
         setIsLoadingApi(true);
         setApiError(null);
 
-        const response = await fetch(getApiUrl("/api/cars"));
+        const response = await fetch("http://localhost:8000/api/cars");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
