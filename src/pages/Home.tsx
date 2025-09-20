@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/ui/navigation";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,18 @@ import {
 } from "@/components/ui/pagination";
 import { AnimatedPage } from "@/components/ui/animated-page";
 import { carsData, searchCars } from "@/data/cars";
+import { getApiUrl } from "@/config/api";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const pageSize = 8;
+
+  // API state
+  const [apiCars, setApiCars] = useState<any[]>([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Static data
   const popularBrands = [
@@ -52,6 +58,78 @@ export default function Home() {
   };
 
   const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
+
+  // Fetch cars from API
+  useEffect(() => {
+    const fetchCarsFromAPI = async () => {
+      try {
+        setIsLoadingApi(true);
+        setApiError(null);
+
+        const response = await fetch(getApiUrl("/api/cars"));
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.data) {
+          setApiCars(data.data);
+        } else {
+          throw new Error("Invalid API response format");
+        }
+      } catch (error) {
+        setApiError(error instanceof Error ? error.message : "Unknown error");
+        console.error("API Error:", error);
+      } finally {
+        setIsLoadingApi(false);
+      }
+    };
+
+    fetchCarsFromAPI();
+  }, []);
+
+  // Transform API data to match car card format
+  const transformApiCar = (apiCar: any) => {
+    return {
+      id: apiCar._id || apiCar.Car_ID?.toString(),
+      name:
+        apiCar.Identification_Model ||
+        apiCar.Car_Full_Name?.split(" ").slice(1).join(" ") ||
+        "Unknown",
+      brand: apiCar.Identification_Brand || "Unknown",
+      price: "Price on request", // API doesn't have price, using placeholder
+      rating: 4.5, // Default rating since API doesn't have this
+      fuelType: apiCar["Fuel_&_Emissions_Mileage_ARAI,_kmpl"]
+        ? "Petrol"
+        : "Unknown",
+      transmission: apiCar.Transmission_Transmission_Type || "Unknown",
+      seating: 5, // Default seating
+      mileage: apiCar["Fuel_&_Emissions_Mileage_ARAI,_kmpl"]
+        ? `${apiCar["Fuel_&_Emissions_Mileage_ARAI,_kmpl"]} kmpl`
+        : "Unknown",
+      features: [
+        apiCar.Comfort_Air_Conditioning === "Manual" ? "AC" : "",
+        apiCar.Infotainment_Touchscreen_Size_inches
+          ? `${apiCar.Infotainment_Touchscreen_Size_inches}" Touchscreen`
+          : "",
+        apiCar.Comfort_Keyless_Entry___Push_Button_Start === "Yes"
+          ? "Keyless Entry"
+          : "",
+        apiCar.Safety_Airbags_Count
+          ? `${apiCar.Safety_Airbags_Count} Airbags`
+          : "",
+      ].filter(Boolean),
+      images: apiCar.Image_URL ? [apiCar.Image_URL] : ["/placeholder.svg"],
+    };
+  };
+
+  // Use API cars if available, otherwise fallback to static data
+  const displayCars = apiCars.length > 0 ? apiCars.map(transformApiCar) : cars;
+  const displayTotalCars = apiCars.length > 0 ? apiCars.length : totalCars;
+  const displayTotalPages =
+    apiCars.length > 0
+      ? Math.max(1, Math.ceil(apiCars.length / pageSize))
+      : totalPages;
 
   return (
     <AnimatedPage animation="automotive">
@@ -153,16 +231,36 @@ export default function Home() {
               <h2 className="text-3xl font-bold">
                 {searchQuery
                   ? `Search Results for "${searchQuery}"`
-                  : "Popular Cars"}
+                  : "Cars from API"}
               </h2>
               <div className="text-muted-foreground">
-                {totalCars} cars found
+                {isLoadingApi ? "Loading..." : `${displayTotalCars} cars found`}
               </div>
             </div>
 
-            {cars.length > 0 ? (
+            {/* API Status */}
+            {apiError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <span className="text-red-700 font-medium">API Error:</span>
+                  <span className="text-red-600 ml-2">{apiError}</span>
+                </div>
+                <p className="text-red-600 text-sm mt-1">
+                  Falling back to static data
+                </p>
+              </div>
+            )}
+
+            {isLoadingApi ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <span className="text-lg">Loading cars from API...</span>
+                </div>
+              </div>
+            ) : displayCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {cars.map((car) => (
+                {displayCars.slice(startIndex, endIndex).map((car) => (
                   <CarCard
                     key={car.id}
                     car={car}
@@ -175,15 +273,16 @@ export default function Home() {
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No cars found</h3>
                 <p className="text-muted-foreground mb-4">
-                  Try adjusting your search terms or browse our popular
-                  categories
+                  {apiError
+                    ? "Unable to load cars from API. Using static data instead."
+                    : "Try adjusting your search terms or browse our popular categories"}
                 </p>
                 <Button onClick={() => handleSearch("")} variant="outline">
                   View All Cars
                 </Button>
               </div>
             )}
-            {cars.length > 0 && totalPages > 1 && (
+            {displayCars.length > 0 && displayTotalPages > 1 && (
               <div className="mt-8">
                 <Pagination>
                   <PaginationContent>
@@ -197,11 +296,11 @@ export default function Home() {
                       />
                     </PaginationItem>
 
-                    {Array.from({ length: totalPages }).map((_, idx) => {
+                    {Array.from({ length: displayTotalPages }).map((_, idx) => {
                       const p = idx + 1;
-                      const isEdge = p === 1 || p === totalPages;
+                      const isEdge = p === 1 || p === displayTotalPages;
                       const isNear = Math.abs(p - page) <= 1;
-                      if (totalPages <= 7 || isEdge || isNear) {
+                      if (displayTotalPages <= 7 || isEdge || isNear) {
                         return (
                           <PaginationItem key={p}>
                             <PaginationLink
@@ -224,7 +323,10 @@ export default function Home() {
                           </PaginationItem>
                         );
                       }
-                      if (p === totalPages - 1 && page < totalPages - 2) {
+                      if (
+                        p === displayTotalPages - 1 &&
+                        page < displayTotalPages - 2
+                      ) {
                         return (
                           <PaginationItem key={p}>
                             <span className="px-2">…</span>
