@@ -1,10 +1,10 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState } from "react";
 import { Navigation } from "@/components/ui/navigation";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, TrendingUp, Star, Loader2 } from "lucide-react";
+import { Search, Filter, TrendingUp, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Pagination,
@@ -15,8 +15,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { AnimatedPage } from "@/components/ui/animated-page";
-import { useCars, usePopularBrands, useFuelTypes } from "@/hooks/useCars";
-import { carsData, searchCars } from "@/data/cars"; // Fallback data
+import { carsData, searchCars } from "@/data/cars";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,27 +23,28 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  // API calls
-  const {
-    data: carsResponse,
-    isLoading: carsLoading,
-    error: carsError,
-  } = useCars({
-    query: searchQuery || undefined,
-    page,
-    limit: pageSize,
-  });
+  // Static data
+  const popularBrands = [
+    "Hyundai",
+    "Maruti Suzuki",
+    "Tata",
+    "Mahindra",
+    "Toyota",
+    "Honda",
+    "Kia",
+    "Jeep",
+  ];
+  const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
 
-  const { data: popularBrands = [], isLoading: brandsLoading } =
-    usePopularBrands();
-  const { data: fuelTypes = [], isLoading: fuelTypesLoading } = useFuelTypes();
+  // Use static data for cars
+  const filteredCars = searchQuery ? searchCars(searchQuery) : carsData;
+  const totalCars = filteredCars.length;
+  const totalPages = Math.max(1, Math.ceil(totalCars / pageSize));
 
-  // Fallback to static data if API fails
-  const cars = carsResponse?.cars || (carsError ? carsData : []);
-  const totalPages =
-    carsResponse?.totalPages ||
-    Math.max(1, Math.ceil((carsError ? carsData.length : 0) / pageSize));
-  const totalCars = carsResponse?.total || (carsError ? carsData.length : 0);
+  // Paginate the filtered cars
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const cars = filteredCars.slice(startIndex, endIndex);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -52,9 +52,6 @@ export default function Home() {
   };
 
   const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
-
-  // Show loading state
-  const isLoading = carsLoading || brandsLoading || fuelTypesLoading;
 
   return (
     <AnimatedPage animation="automotive">
@@ -163,12 +160,7 @@ export default function Home() {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-2 text-lg">Loading cars...</span>
-              </div>
-            ) : cars.length > 0 ? (
+            {cars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {cars.map((car) => (
                   <CarCard
@@ -183,9 +175,8 @@ export default function Home() {
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No cars found</h3>
                 <p className="text-muted-foreground mb-4">
-                  {carsError
-                    ? "Unable to load cars from the server. Please try again later."
-                    : "Try adjusting your search terms or browse our popular categories"}
+                  Try adjusting your search terms or browse our popular
+                  categories
                 </p>
                 <Button onClick={() => handleSearch("")} variant="outline">
                   View All Cars

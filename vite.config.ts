@@ -5,10 +5,17 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: process.env.GITHUB_ACTIONS ? "/autoAssist/" : "./",
+  base: "./",
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      "/api": {
+        target: "http://20.75.49.238:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean

@@ -20,41 +20,16 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { contactService } from "@/services/contactService";
-import { ContactFormData } from "@/types/contact";
 
 export default function Contact() {
-  const [formData, setFormData] = useState<ContactFormData>({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  // Contact form submission mutation
-  const contactMutation = useMutation({
-    mutationFn: (data: ContactFormData) => contactService.submitContact(data),
-    onSuccess: (response) => {
-      toast({
-        title: "Message Sent!",
-        description:
-          response.message ||
-          "Thank you for contacting us. We'll get back to you soon.",
-      });
-      setFormData({ name: "", email: "", subject: "", message: "" });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error Sending Message",
-        description:
-          error.message ||
-          "There was an error sending your message. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +48,16 @@ export default function Contact() {
       return;
     }
 
-    contactMutation.mutate(formData);
+    // Simulate form submission
+    setIsSubmitting(true);
+    setTimeout(() => {
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setIsSubmitting(false);
+    }, 2000);
   };
 
   const contactInfo = [
@@ -203,10 +187,10 @@ export default function Contact() {
 
                     <Button
                       type="submit"
-                      disabled={contactMutation.isPending}
+                      disabled={isSubmitting}
                       className="w-full bg-automotive-gradient hover:shadow-glow transition-all duration-300"
                     >
-                      {contactMutation.isPending ? (
+                      {isSubmitting ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Sending...

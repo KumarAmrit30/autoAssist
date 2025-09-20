@@ -11,17 +11,14 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { useCar } from "@/hooks/useCars";
-import { getCarById } from "@/data/cars"; // Fallback
+import { getCarById } from "@/data/cars";
 
 export default function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // API call with fallback
-  const { data: car, isLoading, error } = useCar(id || "");
-  const fallbackCar = id ? getCarById(id) : undefined;
-  const actualCar = car || (error ? fallbackCar : undefined);
+  // Use static data only
+  const actualCar = id ? getCarById(id) : undefined;
 
   const images =
     actualCar?.images && actualCar.images.length > 0
@@ -37,31 +34,15 @@ export default function CarDetails() {
   const goNext = () =>
     setCurrentIndex((idx) => (idx === images.length - 1 ? 0 : idx + 1));
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <AnimatedPage animation="automotive">
-        <div className="container mx-auto px-4 py-12 text-center space-y-6">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-          <div className="text-2xl font-semibold">Loading car details...</div>
-        </div>
-      </AnimatedPage>
-    );
-  }
-
-  // Error or not found state
+  // Not found state
   if (!actualCar) {
     return (
       <AnimatedPage animation="automotive">
         <div className="container mx-auto px-4 py-12 text-center space-y-6">
           <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
-          <div className="text-2xl font-semibold">
-            {error ? "Unable to load car details" : "Car not found"}
-          </div>
+          <div className="text-2xl font-semibold">Car not found</div>
           <p className="text-muted-foreground">
-            {error
-              ? "There was an error loading the car information. Please try again later."
-              : "The car you're looking for doesn't exist or has been removed."}
+            The car you're looking for doesn't exist or has been removed.
           </p>
           <Button onClick={() => navigate("/home")}>Go to Home</Button>
         </div>
